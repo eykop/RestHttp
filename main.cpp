@@ -11,60 +11,64 @@
     You should have received a copy of the GNU General Public License
     along with Foobar.  If not, see<http://www.gnu.org/licenses/>.
 */
-#include <iostream>
-#include <sstream>
-#include <boost/asio.hpp>
-#include <string>
+
+#define BOOST_ASIO_NO_DEFAULT_LINKED_LIBS
+
+#include "ioservice.h"
 #include "requestdata.h"
 #include "requestor.h"
-#include "ioservice.h"
+
+#include <iostream>
+#include <sstream>
+#include <string>
+
 using namespace std;
 
-int main()
-{
-    std::string http_version;
-    unsigned int httpStatusCode = 0 ;
-    std::string http_status_message;
-    std::string resData;
+int main() {
+  std::string http_version = "";
+  // unsigned int httpStatusCode = 0;
+  std::string http_status_message = "";
+  std::string resData = "";
 
-    //fill the request headers...
-    std::unordered_map<std::string, std::string> headers;
-    headers["Accept"] = "*/*";
-    headers["Connection"] = "Close";
+  // fill the request headers...
+  std::unordered_map<std::string, std::string> headers;
+  headers["Accept"] = "*/*";
+  headers["Connection"] = "Close";
 
-    ReqtuestData reqData("date.jsontest.com",
-                 "http",
-                 "GET",
-                 "/",
-                 headers,
-                 "HTTP/1.1");
+  ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", headers,
+                       "HTTP/1.1");
 
+  // reuse headers after clearing request ones...
+  headers.clear();
 
-    //reuse headers after clearing request ones...
-    headers.clear();
+  Resquestor requestor(io_service);
+  // requestor.connect("date.jsontest.com", "http");
+  requestor.sendRequest(reqData);
+  ResponseData respData;
+  try {
+    requestor.getResponse(respData);
+  } catch (boost::system::system_error& ee) {
+    std::cout << ee.what();
+  }
 
-    Resquestor requestor(io_service);
-    requestor.connect("date.jsontest.com", "http");
-    requestor.sendRequest(reqData);
-    requestor.readResponseStatus(httpStatusCode, http_status_message, http_version);
+  ResponseStatusLine statusLine = respData.getStatusCode();
 
-    //check status for error...
-    if(200 > httpStatusCode || httpStatusCode > 299){
-        return -1;
-    }
+  // check status for error...
+  if (200 > statusLine.StatusCode || statusLine.StatusCode > 299) {
+    return -1;
+  }
 
-    requestor.readResponseHeaders(headers);
-    requestor.readResponseData(resData);
+  // print recived data ...
+  std::cout << statusLine.HttpVersion << " " << statusLine.StatusCode << " "
+            << statusLine.Message << std::endl;
+  headers = respData.getHeaders();
+  for (const auto& header : headers) {
+    std::cout << header.first << ": " << header.second << std::endl;
+  }
+  std::string a;
+  std::cout << "sssss" << std::endl;
+  std::cout << respData.getBody() << std::endl;
+  std::cin >> a;
 
-    //print recived data ...
-    std::cout<<http_version<< " "<< httpStatusCode <<" "<<http_status_message<<std::endl;
-
-    for(const auto& header : headers){
-        std::cout<< header.first << ": " << header.second << std::endl;
-    }
-
-    std::cout<<std::endl;
-    std::cout<<resData<<std::endl;
-
-    return 0;
+  return 0;
 }
