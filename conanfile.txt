@@ -1,0 +1,7 @@
+[requires]
+boost/1.67.0@eykop/stable
+
+[options]
+
+[generators]
+cmake

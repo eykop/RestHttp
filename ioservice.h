@@ -11,8 +11,7 @@
     You should have received a copy of the GNU General Public License
     along with Foobar.  If not, see<http://www.gnu.org/licenses/>.
 */
-#ifndef IOSERVICE_H
-#define IOSERVICE_H
+#pragma once 
 #include <boost/asio.hpp>
 boost::asio::io_service io_service;
-#endif // IOSERVICE_H
+
