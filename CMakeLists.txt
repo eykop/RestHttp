@@ -1,4 +1,8 @@
 ﻿cmake_minimum_required(VERSION 2.8)
+
+set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_CXX_COMPILER "g++") 
+
 project(RestHttp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -24,7 +28,7 @@ message("Boost_INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}")
 target_include_directories(resthttp PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(resthttp Boost::system ${ws2_32_lib})
 
-set(OUTDIR "C:/Users/ekhom/Projects/RestHttp/RestHttp")
+set(OUTDIR "../../RestHttpx")
 
 include_directories(${CMKAKE_CURRENT_SOURCES_DIR})
 

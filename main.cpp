@@ -24,51 +24,39 @@
 
 using namespace std;
 
-int main() {
-  std::string http_version = "";
-  // unsigned int httpStatusCode = 0;
-  std::string http_status_message = "";
-  std::string resData = "";
+int main()
+{
+    // fill the request headers...
+    std::unordered_map<std::string, std::string> headers;
+    headers["Accept"] = "*/*";
+    headers["Connection"] = "Close";
 
-  // fill the request headers...
-  std::unordered_map<std::string, std::string> headers;
-  headers["Accept"] = "*/*";
-  headers["Connection"] = "Close";
+    ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", headers, "HTTP/1.1");
 
-  ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", headers,
-                       "HTTP/1.1");
+    // reuse headers after clearing request ones...
+    headers.clear();
 
-  // reuse headers after clearing request ones...
-  headers.clear();
-
-  Resquestor requestor(io_service);
-  // requestor.connect("date.jsontest.com", "http");
-  requestor.sendRequest(reqData);
-  ResponseData respData;
-  try {
+    Resquestor requestor(io_service);
+    requestor.sendRequest(reqData);
+    ResponseData respData;
     requestor.getResponse(respData);
-  } catch (boost::system::system_error& ee) {
-    std::cout << ee.what();
-  }
 
-  ResponseStatusLine statusLine = respData.getStatusCode();
+    ResponseStatusLine statusLine = respData.getStatusCode();
 
-  // check status for error...
-  if (200 > statusLine.StatusCode || statusLine.StatusCode > 299) {
-    return -1;
-  }
+    // print recived data ...
+    std::cout << statusLine.HttpVersion
+              << " " << statusLine.StatusCode
+              << " " << statusLine.Message << std::endl;
 
-  // print recived data ...
-  std::cout << statusLine.HttpVersion << " " << statusLine.StatusCode << " "
-            << statusLine.Message << std::endl;
-  headers = respData.getHeaders();
-  for (const auto& header : headers) {
-    std::cout << header.first << ": " << header.second << std::endl;
-  }
-  std::string a;
-  std::cout << "sssss" << std::endl;
-  std::cout << respData.getBody() << std::endl;
-  std::cin >> a;
+    headers = respData.getHeaders();
+    for (const auto& header : headers) {
+        std::cout << header.first << ": " << header.second << std::endl;
+    }
 
-  return 0;
+    std::cout << respData.getBody() << std::endl;
+    if (200 > statusLine.StatusCode || statusLine.StatusCode > 299) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
