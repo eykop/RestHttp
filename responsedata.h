@@ -18,29 +18,37 @@ along with Foobar.  If not, see<http://www.gnu.org/licenses/>.
 using namespace std;
 
 struct ResponseStatusLine {
-  ResponseStatusLine() {}
-  ResponseStatusLine(const unsigned int statusCode,
-                     const std::string& httpVersion, const std::string& message)
-      : HttpVersion(httpVersion), Message(message), StatusCode(statusCode) {}
+    ResponseStatusLine() {}
+    ResponseStatusLine(const unsigned int statusCode,
+        const std::string& httpVersion, const std::string& message)
+        : HttpVersion(httpVersion)
+        , Message(message)
+        , StatusCode(statusCode)
+    {
+    }
 
-  std::string HttpVersion;
-  std::string Message;
-  unsigned int StatusCode = 0;
+    std::string HttpVersion;
+    std::string Message;
+    unsigned int StatusCode = 0;
 };
 
 class ResponseData {
- public:
-  ResponseData();
-  ResponseData(const ResponseStatusLine& statusCode,
-               const std::unordered_map<std::string, std::string>& headers,
-               const std::string& body);
-  virtual ~ResponseData();
-  const ResponseStatusLine& getStatusCode();
-  const string& getBody();
-  std::unordered_map<std::string, std::string> getHeaders();
+public:
+    ResponseData();
+    ResponseData(const ResponseStatusLine& statusCode,
+        const std::unordered_map<std::string, std::string>& headers,
+        const std::string& body);
+    virtual ~ResponseData();
+    const ResponseStatusLine& getStatusCode();
+    const string& getBody();
+    std::unordered_map<std::string, std::string> getHeaders();
 
- private:
-  std::unordered_map<std::string, std::string> mHeaders;
-  std::string mBody;
-  ResponseStatusLine mResponseStatusLine;
+    void setBody(const std::string& body);
+    void setResponseStatusLine(const ResponseStatusLine& responseStatusLine);
+    void setHeaders(const std::unordered_map<std::string, std::string>& headers);
+
+private:
+    std::unordered_map<std::string, std::string> mHeaders;
+    std::string mBody;
+    ResponseStatusLine mResponseStatusLine;
 };

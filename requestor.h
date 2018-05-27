@@ -23,22 +23,20 @@
 #include <boost/asio.hpp>
 
 class Resquestor {
- public:
-  Resquestor(boost::asio::io_service &io_service);
-  bool connect(const std::string &host, const std::string &port);
+public:
+    Resquestor(boost::asio::io_service& io_service);
+    bool connect(const std::string& host, const std::string& port);
 
-  void sendRequest(ReqtuestData &reqData);
-  void readResponseStatus(unsigned int &code, std::string &message,
-                          std::string &otherInfo);
-  void readResponseHeaders(
-      std::unordered_map<std::string, std::string> &headers);
-  void readResponseData(std::string &resData);
-  void getResponse(ResponseData &responseData);
+    void sendRequest(const ReqtuestData& reqData);
+    void readResponseStatus(ResponseData& responseData);
+    void readResponseHeaders(ResponseData& responseData);
+    void readResponseData(ResponseData& responseData);
+    void getResponse(ResponseData& responseData);
 
- private:
-  boost::asio::io_service &m_io_service;
-  boost::asio::ip::tcp::socket mSocket;
-  boost::asio::ip::tcp::resolver mResolver;
-  boost::asio::streambuf mResponse;
-  bool mIsConnected = false;
+private:
+    //  boost::asio::io_service &m_io_service;
+    boost::asio::ip::tcp::socket mSocket;
+    boost::asio::ip::tcp::resolver mResolver;
+    boost::asio::streambuf mResponse;
+    bool mIsConnected = false;
 };
