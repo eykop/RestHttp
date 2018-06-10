@@ -24,39 +24,43 @@
 
 using namespace std;
 
-int main()
-{
-    // fill the request headers...
-    std::unordered_map<std::string, std::string> headers;
-    headers["Accept"] = "*/*";
-    headers["Connection"] = "Close";
+int main() {
+  // fill the request headers...
+  std::unordered_map<std::string, std::string> headers;
 
-    ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", headers, "HTTP/1.1");
+  // headers["Accept"] = "*/*";
+  // headers["Connection"] = "Close";
 
-    // reuse headers after clearing request ones...
-    headers.clear();
+  ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", headers,
+                       "HTTP/1.1");
+  // ReqtuestData reqData("httpbin.org", "https", "GET", "/get", headers,
+  // "HTTP/1.1"); ReqtuestData reqData("www.wikipedia.org", "https", "GET", "/",
+  // headers, "HTTP/1.1");
 
-    Resquestor requestor(io_service);
-    requestor.sendRequest(reqData);
-    ResponseData respData;
-    requestor.getResponse(respData);
+  // reuse headers after clearing request ones...
+  headers.clear();
 
-    ResponseStatusLine statusLine = respData.getStatusCode();
+  Resquestor requestor(io_service);
+  requestor.sendRequest(reqData);
+  ResponseData respData;
 
-    // print recived data ...
-    std::cout << statusLine.HttpVersion
-              << " " << statusLine.StatusCode
-              << " " << statusLine.Message << std::endl;
+  requestor.getResponse(respData);
 
-    headers = respData.getHeaders();
-    for (const auto& header : headers) {
-        std::cout << header.first << ": " << header.second << std::endl;
-    }
+  ResponseStatusLine statusLine = respData.getStatusCode();
 
-    std::cout << respData.getBody() << std::endl;
-    if (200 > statusLine.StatusCode || statusLine.StatusCode > 299) {
-        return -1;
-    } else {
-        return 0;
-    }
+  // print received data ...
+  std::cout << statusLine.HttpVersion << " " << statusLine.StatusCode << " "
+            << statusLine.Message << std::endl;
+
+  headers = respData.getHeaders();
+  for (const auto &header : headers) {
+    std::cout << header.first << ": " << header.second << std::endl;
+  }
+
+  std::cout << respData.getBody() << std::endl;
+  if (200 > statusLine.StatusCode || statusLine.StatusCode > 299) {
+    return -1;
+  } else {
+    return 0;
+  }
 }

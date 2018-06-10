@@ -1,29 +1,27 @@
 ﻿cmake_minimum_required(VERSION 2.8)
-
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++") 
-
 project(RestHttp)
+message("CMAKE_CXX_COMPILER_ID :: ${CMAKE_CXX_COMPILER_ID}")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
   # using Clang
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # using GCC
-  set(BV 1.65.0)
+  set(BV 1.66.0)
   set(ws2_32_lib ws2_32)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
   # using Intel C++
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(BV 1.67.0)
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   # using Visual Studio C++
+  set(BV 1.67.0)
   include(conanbuildinfo.cmake)
   conan_basic_setup()
+  message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT}")
 endif()
 
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost ${BV} REQUIRED COMPONENTS system)
 
-add_executable (resthttp "main.cpp" "requestor.cpp" "requestdata.cpp" "responsedata.cpp")
+add_executable (resthttp "main.cpp" "requestor.cpp" "requestdata.cpp" "responsedata.cpp" "asyncrequestor.cpp")
 message("Boost_INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}")
 target_include_directories(resthttp PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(resthttp Boost::system ${ws2_32_lib})
