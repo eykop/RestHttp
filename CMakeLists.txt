@@ -1,30 +1,38 @@
 ﻿cmake_minimum_required(VERSION 2.8)
 project(RestHttp)
 message("CMAKE_CXX_COMPILER_ID :: ${CMAKE_CXX_COMPILER_ID}")
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(Boost_USE_STATIC_LIBS ON)
+#set(OPENSSL_USE_STATIC_LIBS ON)
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
   # using Clang
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # using GCC
   set(BV 1.66.0)
   set(ws2_32_lib ws2_32)
+  include(conanbuildinfomingw.cmake)
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
   # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   # using Visual Studio C++
   set(BV 1.67.0)
   include(conanbuildinfo.cmake)
+  set(crypt32_lib crypt32.lib)
   conan_basic_setup()
   message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT}")
 endif()
-
-set(Boost_USE_STATIC_LIBS ON)
+set(OPENSSL_ROOT_DIR ${CONAN_OPENSSL_ROOT})
+set(OPENSSL_INCLUDE_DIR ${CONAN_INCLUDE_DIRS_OPENSSL})
+set(OPEN_SSL_LIB_DIR ${CONAN_LIB_DIRS_OPENSSL})
 find_package(Boost ${BV} REQUIRED COMPONENTS system)
+find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
+
 
 add_executable (resthttp "main.cpp" "requestor.cpp" "requestdata.cpp" "responsedata.cpp" "asyncrequestor.cpp")
 message("Boost_INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}")
-target_include_directories(resthttp PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(resthttp Boost::system ${ws2_32_lib})
+target_include_directories(resthttp PUBLIC ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+message("ws2_32_lib ${ws2_32_lib}")
+target_link_libraries(resthttp Boost::system ${ws2_32_lib} OpenSSL::SSL OpenSSL::Crypto ${crypt32_lib})
 
 set(OUTDIR "../../RestHttpx")
 

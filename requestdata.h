@@ -13,7 +13,6 @@
 */
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <unordered_map>
 
@@ -21,31 +20,23 @@
 
 class ReqtuestData {
 public:
-    ReqtuestData();
-    ReqtuestData(const std::string& host, const std::string& port,
-        const std::string& method, const std::string& path,
+    ReqtuestData() = delete ;
+
+    ReqtuestData(std::string&& host, std::string&& port,
+        std::string&& method, std::string&& path,
         const std::unordered_map<std::string, std::string>& headers,
-        const std::string& httpVersion = "HTTP/1.1");
-    const std::string& host() const;
-    void setHost(const std::string& host);
+        std::string&& httpVersion = "HTTP/1.1");
 
-    const std::string& port() const;
-    void setPort(const std::string& port);
+    boost::asio::streambuf* buildRequest();
 
-    const std::string& method() const;
-    void setMethod(const std::string& method);
-
-    const std::string& path() const;
-    void setPath(const std::string& path);
-
-    const std::unordered_map<std::string, std::string>& headers() const;
-    void setHeaders(const std::unordered_map<std::string, std::string>& headers);
-
-    const std::string& httpVersion() const;
-    void setHttpVersion(const std::string& httpVersion = "HTTP/1.1");
-
-    char* body() const;
-    void setBody(char* body);
+	const std::string& host() const { return mHost; };
+	const std::string& port() const { return mPort; };
+	const std::string& method() const { return mMethod; };
+	const std::string& path() const { return mPath; };
+	const std::unordered_map<std::string, std::string>& headers() const { return mHeaders; };
+	const std::string& httpVersion() const { return mHttpVersion; };
+	char* body() const { return mBody; };
+	void setBody(char* body) { mBody = body; };
 
 private:
     std::string mHost;
@@ -53,6 +44,7 @@ private:
     std::string mMethod;
     std::string mPath;
     std::string mHttpVersion;
-    char* mBody;
+    char* mBody = nullptr;
     std::unordered_map<std::string, std::string> mHeaders;
+    boost::asio::streambuf mRequest;
 };

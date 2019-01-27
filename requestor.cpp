@@ -17,6 +17,8 @@
 #include "requestor.h"
 #include "responsedata.h"
 
+#include <iostream>
+
 #include <boost/algorithm/string.hpp>
 
 Resquestor::Resquestor(boost::asio::io_service& io_service)
@@ -27,7 +29,11 @@ Resquestor::Resquestor(boost::asio::io_service& io_service)
 
 bool Resquestor::connect(const std::string& host, const std::string& port)
 {
+    // The io_context is required for all I/O
+    //boost::asio::ssl::context context(boost::asio::ssl::context::sslv23);
+
     try {
+
         boost::asio::connect(mSocket, mResolver.resolve({ host, port }));
     } catch (boost::system::system_error& err) {
         std::cout << "error occured: " << err.what();
@@ -40,7 +46,7 @@ bool Resquestor::connect(const std::string& host, const std::string& port)
     return true;
 }
 
-void Resquestor::sendRequest(const ReqtuestData& reqData)
+void Resquestor::sendRequest(ReqtuestData& reqData)
 {
     if (!mSocket.is_open()) {
         mIsConnected = connect(reqData.host(), reqData.port());
@@ -49,40 +55,32 @@ void Resquestor::sendRequest(const ReqtuestData& reqData)
             return;
         }
     }
-    boost::asio::streambuf request;
-    std::ostream request_stream(&request);
-    request_stream << reqData.method() << " " << reqData.path() << " " << reqData.httpVersion() << "\r\n";
-    request_stream << "Host: " << reqData.host() << "\r\n";
-    for (const auto& header : reqData.headers()) {
-        request_stream << header.first << ": " << header.second << "\r\n";
-    }
-    request_stream << "\r\n";
-    boost::asio::write(mSocket, request);
+    boost::asio::streambuf* request = reqData.buildRequest();
+    boost::asio::write(mSocket, *request);
 }
 
-void Resquestor::readResponseStatus(ResponseData& responseData)
+ResponseStatusLine Resquestor::readResponseStatus()
 {
     unsigned int code;
     std::string message;
     std::string otherInfo;
     if (!mIsConnected)
-        return;
+        return ResponseStatusLine{};
     boost::asio::read_until(mSocket, mResponse, "\r\n");
     std::istream response_stream(&mResponse);
     // get http version as other info...
     response_stream >> otherInfo;
     response_stream >> code;
     std::getline(response_stream, message);
-    ResponseStatusLine resStatusLine(code, otherInfo, message);
-    responseData.setResponseStatusLine(resStatusLine);
+    return ResponseStatusLine(code, std::move(otherInfo), std::move(message));
 }
 
-void Resquestor::readResponseHeaders(ResponseData& responseData)
+std::unordered_map<std::string, std::string> Resquestor::readResponseHeaders()
 
 {
     std::unordered_map<std::string, std::string> headers;
     if (!mIsConnected)
-        return;
+        return headers;
     std::istream response_stream(&mResponse);
     boost::asio::read_until(mSocket, mResponse, "\r\n\r\n");
     std::string header;
@@ -91,13 +89,13 @@ void Resquestor::readResponseHeaders(ResponseData& responseData)
         boost::algorithm::split(result, header, boost::is_any_of(":"));
         headers[result[0]] = result[1];
     }
-    responseData.setHeaders(headers);
+    return headers;
 }
 
-void Resquestor::readResponseData(ResponseData& responseData)
+std::string Resquestor::readResponseData()
 {
     if (!mIsConnected) {
-        return;
+        return std::string{};
     }
     std::stringstream ss;
     ss.clear();
@@ -106,8 +104,8 @@ void Resquestor::readResponseData(ResponseData& responseData)
     }
 
     boost::system::error_code error;
-    while (boost::asio::read(
-        mSocket, mResponse, boost::asio::transfer_at_least(1), error)) {
+    while (boost::asio::read(mSocket, mResponse,
+        boost::asio::transfer_at_least(1), error)) {
         if (error != boost::asio::error::eof) {
             throw boost::system::system_error(error);
         }
@@ -115,18 +113,23 @@ void Resquestor::readResponseData(ResponseData& responseData)
             ss << &mResponse;
         }
     }
-    responseData.setBody(ss.str());
+
     mSocket.close();
+    return ss.str();
 }
 
-void Resquestor::getResponse(ResponseData& responseData)
+ResponseData Resquestor::getResponse()
 {
-    readResponseStatus(responseData);
-    readResponseHeaders(responseData);
+
+    ResponseData responseData;
+    responseData.setResponseStatusLine(readResponseStatus());
+    responseData.setHeaders(readResponseHeaders());
     try {
-        readResponseData(responseData);
+
+        responseData.setBody(readResponseData());
     } catch (boost::system::system_error& ee) {
         std::cout << "some error occured" << std::endl;
         std::cout << ee.what();
     }
+    return responseData;
 }
