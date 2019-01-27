@@ -18,11 +18,11 @@ along with Foobar.  If not, see<http://www.gnu.org/licenses/>.
 using namespace std;
 
 struct ResponseStatusLine {
-    ResponseStatusLine() {}
-    ResponseStatusLine(const unsigned int statusCode,
-        const std::string& httpVersion, const std::string& message)
-        : HttpVersion(httpVersion)
-        , Message(message)
+	ResponseStatusLine() = default;
+    ResponseStatusLine(unsigned int statusCode,
+        std::string&& httpVersion, std::string&& message)
+        : HttpVersion(std::move(httpVersion))
+        , Message(std::move(message))
         , StatusCode(statusCode)
     {
     }
@@ -34,18 +34,20 @@ struct ResponseStatusLine {
 
 class ResponseData {
 public:
-    ResponseData();
-    ResponseData(const ResponseStatusLine& statusCode,
-        const std::unordered_map<std::string, std::string>& headers,
-        const std::string& body);
+	ResponseData(const ResponseData&) = delete;
+	ResponseData(ResponseData&&) = default;
+	ResponseData() = default;
+    ResponseData(ResponseStatusLine&& statusCode,
+        std::unordered_map<std::string, std::string>&& headers,
+        std::string&& body);
     virtual ~ResponseData();
-    const ResponseStatusLine& getStatusCode();
-    const string& getBody();
-    std::unordered_map<std::string, std::string> getHeaders();
+    const ResponseStatusLine& getStatusCode() const { return mResponseStatusLine; };
+    const string& getBody() const { return mBody; };
+    const std::unordered_map<std::string, std::string>& getHeaders() const { return mHeaders; };
 
-    void setBody(const std::string& body);
-    void setResponseStatusLine(const ResponseStatusLine& responseStatusLine);
-    void setHeaders(const std::unordered_map<std::string, std::string>& headers);
+    void setBody(std::string&& body);
+    void setResponseStatusLine(ResponseStatusLine&& responseStatusLine);
+    void setHeaders(std::unordered_map<std::string, std::string>&& headers);
 
 private:
     std::unordered_map<std::string, std::string> mHeaders;

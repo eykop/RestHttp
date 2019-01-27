@@ -16,9 +16,7 @@
 #include "requestdata.h"
 #include "responsedata.h"
 
-#include <sstream>
 #include <string>
-#include <unordered_map>
 
 #include <boost/asio.hpp>
 
@@ -27,16 +25,20 @@ public:
     Resquestor(boost::asio::io_service& io_service);
     bool connect(const std::string& host, const std::string& port);
 
-    void sendRequest(const ReqtuestData& reqData);
-    void readResponseStatus(ResponseData& responseData);
-    void readResponseHeaders(ResponseData& responseData);
-    void readResponseData(ResponseData& responseData);
-    void getResponse(ResponseData& responseData);
+    void sendRequest(ReqtuestData& reqData);
+    
+    
+	ResponseData getResponse();
+
 
 private:
+	std::string readResponseData();
+	ResponseStatusLine readResponseStatus();
+	std::unordered_map<std::string, std::string> readResponseHeaders();
     //  boost::asio::io_service &m_io_service;
     boost::asio::ip::tcp::socket mSocket;
     boost::asio::ip::tcp::resolver mResolver;
     boost::asio::streambuf mResponse;
     bool mIsConnected = false;
+    
 };

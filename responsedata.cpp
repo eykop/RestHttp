@@ -1,42 +1,28 @@
 #include "responsedata.h"
 
-ResponseData::ResponseData() {}
-
 ResponseData::ResponseData(
-    const ResponseStatusLine& statusCode,
-    const std::unordered_map<std::string, std::string>& headers,
-    const string& body)
-    : mHeaders(headers)
-    , mBody(body)
-    , mResponseStatusLine(statusCode)
+    ResponseStatusLine&& statusCode,
+    std::unordered_map<std::string, std::string>&& headers,
+    string&& body)
+    : mHeaders(std::move(headers))
+    , mBody(std::move(body))
+    , mResponseStatusLine(std::move(statusCode))
 {
 }
 
-ResponseData::~ResponseData() {}
+ResponseData::~ResponseData() = default;
 
-const ResponseStatusLine& ResponseData::getStatusCode()
+void ResponseData::setBody(std::string&& body)
 {
-    return mResponseStatusLine;
+    mBody = std::move(body);
 }
 
-const std::string& ResponseData::getBody() { return mBody; }
-
-std::unordered_map<std::string, std::string> ResponseData::getHeaders()
+void ResponseData::setResponseStatusLine(ResponseStatusLine&& responseStatusLine)
 {
-    return mHeaders;
+    mResponseStatusLine = std::move(responseStatusLine);
 }
 
-void ResponseData::setBody(const std::string& body)
+void ResponseData::setHeaders(std::unordered_map<std::string, std::string>&& headers)
 {
-    mBody = body;
-}
-
-void ResponseData::setResponseStatusLine(const ResponseStatusLine& responseStatusLine)
-{
-    mResponseStatusLine = responseStatusLine;
-}
-
-void ResponseData::setHeaders(const std::unordered_map<std::string, std::string>& headers)
-{
-    mHeaders = headers;
+    mHeaders = std::move(headers);
 }

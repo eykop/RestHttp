@@ -13,54 +13,49 @@
 */
 
 #define BOOST_ASIO_NO_DEFAULT_LINKED_LIBS
-
 #include "ioservice.h"
 #include "requestdata.h"
 #include "requestor.h"
 
 #include <iostream>
-#include <sstream>
 #include <string>
 
 using namespace std;
 
-int main() {
-  // fill the request headers...
-  std::unordered_map<std::string, std::string> headers;
+int main()
+{
+    // fill the request headers...
+    std::unordered_map<std::string, std::string> inHeaders;
 
-  // headers["Accept"] = "*/*";
-  // headers["Connection"] = "Close";
+    inHeaders["Accept"] = "*/*";
+    inHeaders["Connection"] = "Close";
 
-  ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", headers,
-                       "HTTP/1.1");
-  // ReqtuestData reqData("httpbin.org", "https", "GET", "/get", headers,
-  // "HTTP/1.1"); ReqtuestData reqData("www.wikipedia.org", "https", "GET", "/",
-  // headers, "HTTP/1.1");
+    ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", inHeaders,
+        "HTTP/1.1");
+    //    ReqtuestData reqData("httpbin.org", "http", "GET", "/get", inHeaders,
+    //        "HTTP/1.1");
+    //    ReqtuestData reqData("www.wikipedia.org", "https", "GET", "/", inHeaders,
+    //        "HTTP/1.1");
 
-  // reuse headers after clearing request ones...
-  headers.clear();
+    Resquestor requestor(io_service);
+    requestor.sendRequest(reqData);
+    ResponseData respData(requestor.getResponse());
 
-  Resquestor requestor(io_service);
-  requestor.sendRequest(reqData);
-  ResponseData respData;
+    const auto& statusLine = respData.getStatusCode();
 
-  requestor.getResponse(respData);
+    // print received data ...
+    std::cout << statusLine.HttpVersion << " " << statusLine.StatusCode << " "
+              << statusLine.Message << std::endl;
+    std::unordered_map<std::string, std::string> headers = respData.getHeaders();
+    for (const auto& header : headers) {
+        std::cout << header.first << ": " << header.second << std::endl;
+        std::cout << std::flush;
+    }
 
-  ResponseStatusLine statusLine = respData.getStatusCode();
-
-  // print received data ...
-  std::cout << statusLine.HttpVersion << " " << statusLine.StatusCode << " "
-            << statusLine.Message << std::endl;
-
-  headers = respData.getHeaders();
-  for (const auto &header : headers) {
-    std::cout << header.first << ": " << header.second << std::endl;
-  }
-
-  std::cout << respData.getBody() << std::endl;
-  if (200 > statusLine.StatusCode || statusLine.StatusCode > 299) {
-    return -1;
-  } else {
-    return 0;
-  }
+    std::cout << respData.getBody() << std::endl;
+    if (200 > statusLine.StatusCode || statusLine.StatusCode > 299) {
+        return -1;
+    } else {
+        return 0;
+    }
 }

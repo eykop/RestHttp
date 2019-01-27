@@ -13,89 +13,28 @@
 */
 #include "requestdata.h"
 
-ReqtuestData::ReqtuestData() {}
-
 ReqtuestData::ReqtuestData(
-    const std::string& host, const std::string& port, const std::string& method,
-    const std::string& path,
-    const std::unordered_map<std::string, std::string>& headers,
-    const std::string& httpVersion)
-    : mHost(host)
-    , mPort(port)
-    , mMethod(method)
-    , mPath(path)
-    , mHttpVersion(httpVersion)
-    , mHeaders(headers)
+    std::string&& host, std::string&& port, std::string&& method,
+    std::string&& path, const std::unordered_map<std::string, std::string>& headers,
+    std::string&& httpVersion)
+    : mHost(std::move(host))
+    , mPort(std::move(port))
+    , mMethod(std::move(method))
+    , mPath(std::move(path))
+    , mHttpVersion(std::move(httpVersion))
+    , mHeaders(std::move(headers))
 {
 }
 
-const std::string& ReqtuestData::host() const
-{
-    return mHost;
-}
+boost::asio::streambuf* ReqtuestData::buildRequest() {
 
-void ReqtuestData::setHost(const std::string& host)
-{
-    mHost = host;
-}
-
-const std::string& ReqtuestData::port() const
-{
-    return mPort;
-}
-
-void ReqtuestData::setPort(const std::string& port)
-{
-    mPort = port;
-}
-
-const std::string& ReqtuestData::method() const
-{
-    return mMethod;
-}
-
-void ReqtuestData::setMethod(const std::string& method)
-{
-    mMethod = method;
-}
-
-const std::string& ReqtuestData::path() const
-{
-    return mPath;
-}
-
-void ReqtuestData::setPath(const std::string& path)
-{
-    mPath = path;
-}
-
-const std::unordered_map<std::string, std::string>& ReqtuestData::headers() const
-{
-    return mHeaders;
-}
-
-void ReqtuestData::setHeaders(
-    const std::unordered_map<std::string, std::string>& headers)
-{
-    mHeaders = headers;
-}
-
-const std::string& ReqtuestData::httpVersion() const
-{
-    return mHttpVersion;
-}
-
-void ReqtuestData::setHttpVersion(const std::string& httpVersion)
-{
-    mHttpVersion = httpVersion;
-}
-
-char* ReqtuestData::body() const
-{
-    return mBody;
-}
-
-void ReqtuestData::setBody(char* body)
-{
-    mBody = body;
+	std::ostream request_stream(&mRequest);
+	request_stream << mMethod << " " << mPath << " "
+			<< mHttpVersion << "\r\n";
+	request_stream << "Host: " << mHost << "\r\n";
+	for (const auto& header : mHeaders) {
+		request_stream << header.first << ": " << header.second << "\r\n";
+	}
+	request_stream << "\r\n";
+	return &mRequest;
 }
