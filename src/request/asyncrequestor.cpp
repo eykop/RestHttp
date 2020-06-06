@@ -1,4 +1,4 @@
-#include "asyncrequestor.h"
+#include "../include/request/asyncrequestor.h"
 
 AsyncRequestor::AsyncRequestor(boost::asio::io_service &io_service,
 		const std::string& server,

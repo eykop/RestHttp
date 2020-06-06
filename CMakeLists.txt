@@ -4,38 +4,42 @@ message("CMAKE_CXX_COMPILER_ID :: ${CMAKE_CXX_COMPILER_ID}")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(Boost_USE_STATIC_LIBS ON)
 #set(OPENSSL_USE_STATIC_LIBS ON)
+include(conanbuildinfo.cmake)
+conan_basic_setup()
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-  # using Clang
+    # using Clang
+  set(BV 1.73.0)
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # using GCC
   set(BV 1.70.0)
   include(conanbuildinfo.cmake)
   message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT} ${BV}")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
-  # using Intel C++
+    # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-  # using Visual Studio C++
+    # using Visual Studio C++
   set(BV 1.67.0)
-  include(conanbuildinfo.cmake)
   set(crypt32_lib crypt32.lib)
-  conan_basic_setup()
-  message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT}")
 endif()
-set(BOOST_ROOT ${CONAN_BOOST_ROOT})
-set(BOOST_INCLUDE_DIR ${CONAN_INCLUDE_DIRS_BOOST})
-set(BOOST_LIB_DIR ${CONAN_LIB_DIRS_BOOST})
+message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT}")
 set(OPENSSL_ROOT_DIR ${CONAN_OPENSSL_ROOT})
 set(OPENSSL_INCLUDE_DIR ${CONAN_INCLUDE_DIRS_OPENSSL})
 set(OPEN_SSL_LIB_DIR ${CONAN_LIB_DIRS_OPENSSL})
-message("BOOST_INCLUDE_DIR  ${CONAN_INCLUDE_DIRS_BOOST} ${BOOST_LIB_DIR}")
+message("Boost_INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}")
+find_package(Boost ${BV} REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
-find_package(Threads)
-find_package(Boost REQUIRED COMPONENTS system thread)
-add_executable (resthttp "main.cpp" "requestor.cpp" "requestdata.cpp" "responsedata.cpp" "asyncrequestor.cpp")
-target_include_directories(resthttp PUBLIC ${BOOST_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
-message("ws2_32_lib ${ws2_32_lib}")
-target_link_libraries(resthttp Boost::system OpenSSL::SSL OpenSSL::Crypto ${crypt32_lib} ${CMAKE_THREAD_LIBS_INIT})
 
+
+add_executable (resthttp "src/main.cpp"
+        "src/request/requestor.cpp" "src/request/requestdata.cpp"
+        "src/response/responsedata.cpp" "src/request/asyncrequestor.cpp")
+
+message("Boost_INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}")
+target_include_directories(resthttp PUBLIC ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+message("ws2_32_lib ${ws2_32_lib}")
+target_link_libraries(resthttp Boost::system ${ws2_32_lib} OpenSSL::SSL OpenSSL::Crypto ${crypt32_lib})
+
+set(OUTDIR "../../RestHttpx")
 
 include_directories(${CMKAKE_CURRENT_SOURCES_DIR})
 

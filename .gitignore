@@ -84,3 +84,4 @@ data
 conan.lock
 conaninfo.txt
 .kdev4
+cmake-build-debug

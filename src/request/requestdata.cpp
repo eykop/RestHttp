@@ -11,7 +11,7 @@
     You should have received a copy of the GNU General Public License
     along with Foobar.  If not, see<http://www.gnu.org/licenses/>.
 */
-#include "requestdata.h"
+#include "../include/request/requestdata.h"
 
 ReqtuestData::ReqtuestData(
     std::string&& host, std::string&& port, std::string&& method,

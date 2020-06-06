@@ -13,9 +13,9 @@
 */
 
 #define BOOST_ASIO_NO_DEFAULT_LINKED_LIBS
+#include "include/request/requestdata.h"
+#include "include/request/requestor.h"
 #include "ioservice.h"
-#include "requestdata.h"
-#include "requestor.h"
 
 #include <iostream>
 #include <string>

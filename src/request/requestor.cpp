@@ -14,8 +14,8 @@
 
 #define D_SCL_SECURE_NO_WARNINGS 1
 
-#include "requestor.h"
-#include "responsedata.h"
+#include "../include/request/requestor.h"
+#include "../include/response/responsedata.h"
 
 #include <iostream>
 

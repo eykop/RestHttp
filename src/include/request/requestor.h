@@ -13,8 +13,8 @@
 */
 #pragma once
 
+#include "../response/responsedata.h"
 #include "requestdata.h"
-#include "responsedata.h"
 
 #include <string>
 
