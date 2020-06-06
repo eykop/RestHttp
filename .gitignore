@@ -82,11 +82,8 @@ build2
 data
 .idea
 conan.lock
-conaninfo.txt
 .kdev4
 cmake-build-debug
-graph_info.json
 conaninfo.txt
-conanbuildinfo.txt
-conanbuildinfo.cmake
-conan.lock
+cmake_install.cmake
+RestHttp.kdev4
