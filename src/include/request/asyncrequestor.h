@@ -5,16 +5,21 @@
 
 #include <string>
 
-class ReqtuestData;
+class RequestData;
 
 class AsyncRequestor {
 public:
-    AsyncRequestor(boost::asio::io_service &io_service,
-					const std::string& server,
-					const std::string& path);
+    AsyncRequestor() = delete;
+    AsyncRequestor(const AsyncRequestor& asyncRequestor) = delete;
+    AsyncRequestor& operator=(const AsyncRequestor& asyncRequestor) = delete;
+
+    AsyncRequestor(boost::asio::io_service& io_service,
+        const std::string& server,
+        const std::string& path);
+
 private:
     bool connect(const std::string& host, const std::string& port);
-    void sendRequest(ReqtuestData& reqData);
+    void sendRequest(RequestData& reqData);
 
     boost::asio::ip::tcp::socket mSocket;
     boost::asio::ip::tcp::resolver mResolver;

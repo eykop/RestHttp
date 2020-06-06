@@ -10,8 +10,6 @@ ResponseData::ResponseData(
 {
 }
 
-ResponseData::~ResponseData() = default;
-
 void ResponseData::setBody(std::string&& body)
 {
     mBody = std::move(body);

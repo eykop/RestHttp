@@ -13,7 +13,7 @@
 */
 #include "../include/request/requestdata.h"
 
-ReqtuestData::ReqtuestData(
+RequestData::RequestData(
     std::string&& host, std::string&& port, std::string&& method,
     std::string&& path, const std::unordered_map<std::string, std::string>& headers,
     std::string&& httpVersion)
@@ -26,15 +26,16 @@ ReqtuestData::ReqtuestData(
 {
 }
 
-boost::asio::streambuf* ReqtuestData::buildRequest() {
+boost::asio::streambuf* RequestData::buildRequest()
+{
 
-	std::ostream request_stream(&mRequest);
-	request_stream << mMethod << " " << mPath << " "
-			<< mHttpVersion << "\r\n";
-	request_stream << "Host: " << mHost << "\r\n";
-	for (const auto& header : mHeaders) {
-		request_stream << header.first << ": " << header.second << "\r\n";
-	}
-	request_stream << "\r\n";
-	return &mRequest;
+    std::ostream request_stream(&mRequest);
+    request_stream << mMethod << " " << mPath << " "
+                   << mHttpVersion << "\r\n";
+    request_stream << "Host: " << mHost << "\r\n";
+    for (const auto& header : mHeaders) {
+        request_stream << header.first << ": " << header.second << "\r\n";
+    }
+    request_stream << "\r\n";
+    return &mRequest;
 }
