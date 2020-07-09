@@ -13,9 +13,9 @@
 */
 
 #define BOOST_ASIO_NO_DEFAULT_LINKED_LIBS
+#include "include/request/requestdata.h"
+#include "include/request/requestor.h"
 #include "ioservice.h"
-#include "requestdata.h"
-#include "requestor.h"
 
 #include <iostream>
 #include <string>
@@ -30,14 +30,14 @@ int main()
     inHeaders["Accept"] = "*/*";
     inHeaders["Connection"] = "Close";
 
-    ReqtuestData reqData("date.jsontest.com", "http", "GET", "/", inHeaders,
+    RequestData reqData("date.jsontest.com", "http", "GET", "/", inHeaders,
         "HTTP/1.1");
-    //    ReqtuestData reqData("httpbin.org", "http", "GET", "/get", inHeaders,
+    //    RequestData reqData("httpbin.org", "http", "GET", "/get", inHeaders,
     //        "HTTP/1.1");
-    //    ReqtuestData reqData("www.wikipedia.org", "https", "GET", "/", inHeaders,
+    //    RequestData reqData("www.wikipedia.org", "https", "GET", "/", inHeaders,
     //        "HTTP/1.1");
 
-    Resquestor requestor(io_service);
+    Requestor requestor(io_service);
     requestor.sendRequest(reqData);
     ResponseData respData(requestor.getResponse());
 

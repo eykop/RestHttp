@@ -18,7 +18,7 @@ along with Foobar.  If not, see<http://www.gnu.org/licenses/>.
 using namespace std;
 
 struct ResponseStatusLine {
-	ResponseStatusLine() = default;
+    ResponseStatusLine() = default;
     ResponseStatusLine(unsigned int statusCode,
         std::string&& httpVersion, std::string&& message)
         : HttpVersion(std::move(httpVersion))
@@ -34,13 +34,17 @@ struct ResponseStatusLine {
 
 class ResponseData {
 public:
-	ResponseData(const ResponseData&) = delete;
-	ResponseData(ResponseData&&) = default;
-	ResponseData() = default;
+    ResponseData() = default;
+    ResponseData(ResponseData&&) = default;
+
+    ResponseData(const ResponseData&) = delete;
+    ResponseData& operator=(const ResponseData& responseData) = delete;
+
     ResponseData(ResponseStatusLine&& statusCode,
         std::unordered_map<std::string, std::string>&& headers,
         std::string&& body);
-    virtual ~ResponseData();
+
+    virtual ~ResponseData() = default;
     const ResponseStatusLine& getStatusCode() const { return mResponseStatusLine; };
     const string& getBody() const { return mBody; };
     const std::unordered_map<std::string, std::string>& getHeaders() const { return mHeaders; };

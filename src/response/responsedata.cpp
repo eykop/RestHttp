@@ -1,4 +1,4 @@
-#include "responsedata.h"
+#include "../include/response/responsedata.h"
 
 ResponseData::ResponseData(
     ResponseStatusLine&& statusCode,
@@ -9,8 +9,6 @@ ResponseData::ResponseData(
     , mResponseStatusLine(std::move(statusCode))
 {
 }
-
-ResponseData::~ResponseData() = default;
 
 void ResponseData::setBody(std::string&& body)
 {

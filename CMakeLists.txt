@@ -1,63 +1,57 @@
 ﻿cmake_minimum_required(VERSION 2.8)
-project(RestHttp)
-message("CMAKE_CXX_COMPILER_ID :: ${CMAKE_CXX_COMPILER_ID}")
+project(restHttp LANGUAGES CXX)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+message("CMAKE_CXX_COMPILER_ID :: ${CMAKE_CXX_COMPILER_ID}")
+
+#load dependencies using conan package manager...
+include(conanbuildinfo.cmake)
+conan_basic_setup()
+
 set(Boost_USE_STATIC_LIBS ON)
-#set(OPENSSL_USE_STATIC_LIBS ON)
+set(OPENSSL_USE_STATIC_LIBS ON)
+
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-  # using Clang
+    # using Clang
+  set(BV 1.73.0)
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # using GCC
   set(BV 1.70.0)
   include(conanbuildinfo.cmake)
   message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT} ${BV}")
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
-  # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-  # using Visual Studio C++
+    # using Visual Studio C++
   set(BV 1.67.0)
-  include(conanbuildinfo.cmake)
   set(crypt32_lib crypt32.lib)
-  conan_basic_setup()
-  message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT}")
 endif()
-set(BOOST_ROOT ${CONAN_BOOST_ROOT})
-set(BOOST_INCLUDE_DIR ${CONAN_INCLUDE_DIRS_BOOST})
-set(BOOST_LIB_DIR ${CONAN_LIB_DIRS_BOOST})
+message("CONAN_BOOST_ROOT ${CONAN_BOOST_ROOT}")
 set(OPENSSL_ROOT_DIR ${CONAN_OPENSSL_ROOT})
 set(OPENSSL_INCLUDE_DIR ${CONAN_INCLUDE_DIRS_OPENSSL})
 set(OPEN_SSL_LIB_DIR ${CONAN_LIB_DIRS_OPENSSL})
-message("BOOST_INCLUDE_DIR  ${CONAN_INCLUDE_DIRS_BOOST} ${BOOST_LIB_DIR}")
+message("Boost_INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}")
+find_package(Boost ${BV} REQUIRED COMPONENTS system)
 find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
-find_package(Threads)
-find_package(Boost REQUIRED COMPONENTS system thread)
-add_executable (resthttp "main.cpp" "requestor.cpp" "requestdata.cpp" "responsedata.cpp" "asyncrequestor.cpp")
-target_include_directories(resthttp PUBLIC ${BOOST_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
-message("ws2_32_lib ${ws2_32_lib}")
-target_link_libraries(resthttp Boost::system OpenSSL::SSL OpenSSL::Crypto ${crypt32_lib} ${CMAKE_THREAD_LIBS_INIT})
+find_package(Boost ${BV} REQUIRED COMPONENTS system)
 
 
-include_directories(${CMKAKE_CURRENT_SOURCES_DIR})
+add_executable (${PROJECT_NAME}
+        "src/main.cpp"
+        "src/include/request/requestdata.h"
+        "src/request/requestdata.cpp"
+        "src/include/request/requestor.h"
+        "src/request/requestor.cpp"
+        "src/include/request/asyncrequestor.h"
+        "src/request/asyncrequestor.cpp"
+        "src/include/response/responsedata.h"
+        "src/response/responsedata.cpp"
+        )
 
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${OUTDIR}/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OUTDIR}/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OUTDIR}/bin")
-set(CMAKE_BINARY_DIR "${OUTDIR}/out")
-
-
-message("CMKAKE_CURRENT_SOURCES_DIR dir is ${CMKAKE_CURRENT_SOURCES_DIR}")
-
-set(CMAKE_CXX_STANDARD 11)  # enable C++11 standard
-#use latest standard and enable all warnings..
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")
-
-#add_library (resthttp STATIC "requester.cpp" "requestdata.cpp")
-#STATIC|SHARED|MODULE
-#There are three types of library that you can build:
-#   STATIC builds a static library, i.e. a library that gets embedded into whichever executable decides to use it.
-#  SHARED builds a shared library (.so on Linux, .dll on Windows).
-#  MODULE builds a plugin library — something that you do not link against, but can load dynamically at runtime. 
+target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} Boost::system ${ws2_32_lib} OpenSSL::SSL OpenSSL::Crypto ${crypt32_lib})
 
 if(WIN32)
     # We have to set _WIN32_WINNT for Asio

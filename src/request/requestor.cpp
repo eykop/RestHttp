@@ -14,26 +14,24 @@
 
 #define D_SCL_SECURE_NO_WARNINGS 1
 
-#include "requestor.h"
-#include "responsedata.h"
+#include "../include/request/requestor.h"
+#include "../include/response/responsedata.h"
 
 #include <iostream>
 
 #include <boost/algorithm/string.hpp>
 
-Resquestor::Resquestor(boost::asio::io_service& io_service)
+Requestor::Requestor(boost::asio::io_service& io_service)
     : mSocket(io_service)
     , mResolver(io_service)
 {
 }
 
-bool Resquestor::connect(const std::string& host, const std::string& port)
+bool Requestor::connect(const std::string& host, const std::string& port)
 {
     // The io_context is required for all I/O
     //boost::asio::ssl::context context(boost::asio::ssl::context::sslv23);
-
     try {
-
         boost::asio::connect(mSocket, mResolver.resolve({ host, port }));
     } catch (boost::system::system_error& err) {
         std::cout << "error occured: " << err.what();
@@ -46,7 +44,7 @@ bool Resquestor::connect(const std::string& host, const std::string& port)
     return true;
 }
 
-void Resquestor::sendRequest(ReqtuestData& reqData)
+void Requestor::sendRequest(RequestData& reqData)
 {
     if (!mSocket.is_open()) {
         mIsConnected = connect(reqData.host(), reqData.port());
@@ -59,13 +57,14 @@ void Resquestor::sendRequest(ReqtuestData& reqData)
     boost::asio::write(mSocket, *request);
 }
 
-ResponseStatusLine Resquestor::readResponseStatus()
+ResponseStatusLine Requestor::readResponseStatus()
 {
     unsigned int code;
     std::string message;
     std::string otherInfo;
-    if (!mIsConnected)
-        return ResponseStatusLine{};
+    if (!mIsConnected) {
+        return ResponseStatusLine {};
+    }
     boost::asio::read_until(mSocket, mResponse, "\r\n");
     std::istream response_stream(&mResponse);
     // get http version as other info...
@@ -75,7 +74,7 @@ ResponseStatusLine Resquestor::readResponseStatus()
     return ResponseStatusLine(code, std::move(otherInfo), std::move(message));
 }
 
-std::unordered_map<std::string, std::string> Resquestor::readResponseHeaders()
+std::unordered_map<std::string, std::string> Requestor::readResponseHeaders()
 
 {
     std::unordered_map<std::string, std::string> headers;
@@ -92,10 +91,10 @@ std::unordered_map<std::string, std::string> Resquestor::readResponseHeaders()
     return headers;
 }
 
-std::string Resquestor::readResponseData()
+std::string Requestor::readResponseData()
 {
     if (!mIsConnected) {
-        return std::string{};
+        return std::string {};
     }
     std::stringstream ss;
     ss.clear();
@@ -118,9 +117,8 @@ std::string Resquestor::readResponseData()
     return ss.str();
 }
 
-ResponseData Resquestor::getResponse()
+ResponseData Requestor::getResponse()
 {
-
     ResponseData responseData;
     responseData.setResponseStatusLine(readResponseStatus());
     responseData.setHeaders(readResponseHeaders());

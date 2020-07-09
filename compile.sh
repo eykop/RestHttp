@@ -1,1 +1,5 @@
-g++ main.cpp requestdata.cpp requestor.cpp -o main -lpthread -lboost_system --std=c++11
+conan install conanfile.txt --build missing
+cmake CMakeLists.txt -B build/debug
+cd build/debug
+make
+

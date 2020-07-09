@@ -18,25 +18,27 @@
 
 #include <boost/asio.hpp>
 
-class ReqtuestData {
+class RequestData {
 public:
-    ReqtuestData() = delete ;
+    RequestData() = delete;
+    RequestData(const RequestData& requestData) = delete;
+    RequestData& operator=(const RequestData& requestData) = delete;
 
-    ReqtuestData(std::string&& host, std::string&& port,
+    RequestData(std::string&& host, std::string&& port,
         std::string&& method, std::string&& path,
         const std::unordered_map<std::string, std::string>& headers,
         std::string&& httpVersion = "HTTP/1.1");
 
     boost::asio::streambuf* buildRequest();
 
-	const std::string& host() const { return mHost; };
-	const std::string& port() const { return mPort; };
-	const std::string& method() const { return mMethod; };
-	const std::string& path() const { return mPath; };
-	const std::unordered_map<std::string, std::string>& headers() const { return mHeaders; };
-	const std::string& httpVersion() const { return mHttpVersion; };
-	char* body() const { return mBody; };
-	void setBody(char* body) { mBody = body; };
+    const std::string& host() const { return mHost; };
+    const std::string& port() const { return mPort; };
+    const std::string& method() const { return mMethod; };
+    const std::string& path() const { return mPath; };
+    const std::unordered_map<std::string, std::string>& headers() const { return mHeaders; };
+    const std::string& httpVersion() const { return mHttpVersion; };
+    char* body() const { return mBody; };
+    void setBody(char* body) { mBody = body; };
 
 private:
     std::string mHost;

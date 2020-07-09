@@ -13,32 +13,29 @@
 */
 #pragma once
 
+#include "../response/responsedata.h"
 #include "requestdata.h"
-#include "responsedata.h"
 
 #include <string>
 
 #include <boost/asio.hpp>
 
-class Resquestor {
+class Requestor {
 public:
-    Resquestor(boost::asio::io_service& io_service);
-    bool connect(const std::string& host, const std::string& port);
-
-    void sendRequest(ReqtuestData& reqData);
-    
-    
-	ResponseData getResponse();
-
+    Requestor() = delete;
+    Requestor(const Requestor& requestor) = delete;
+    Requestor& operator=(const Requestor& requestor) = delete;
+    Requestor(boost::asio::io_service& io_service);
+    [[nodiscard]] bool connect(const std::string& host, const std::string& port);
+    void sendRequest(RequestData& reqData);
+    ResponseData getResponse();
 
 private:
-	std::string readResponseData();
-	ResponseStatusLine readResponseStatus();
-	std::unordered_map<std::string, std::string> readResponseHeaders();
-    //  boost::asio::io_service &m_io_service;
+    [[nodiscard]] std::string readResponseData();
+    ResponseStatusLine readResponseStatus();
+    std::unordered_map<std::string, std::string> readResponseHeaders();
     boost::asio::ip::tcp::socket mSocket;
     boost::asio::ip::tcp::resolver mResolver;
     boost::asio::streambuf mResponse;
     bool mIsConnected = false;
-    
 };
